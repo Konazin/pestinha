@@ -134,7 +134,7 @@ Seis decisões aprovadas pelo proprietário, transcritas do pedido do M0 (a conf
 
 ## 7. Lacunas
 
-- **L1** — `docs/plans/PLANO-PESTINHA-ANIME-v1.1.md` **ainda não foi disponibilizado** ao workspace. `ANIME-ROADMAP.md` foi corrigido para os objetivos M0–M7 informados pelo proprietário em mensagem, mas não foi conferido contra o texto do plano. Ver `ANIME-CONFORMIDADE-M0.md`.
+- **L1** — Os arquivos do plano (v1.1 e v1.2) **não foram disponibilizados**. `ANIME-ROADMAP.md` (v1.2) segue as diretrizes aprovadas pelo proprietário em mensagem (M0–M8), **sem conferência literal** com o plano. Ver `ANIME-CONFORMIDADE-M0.md`.
 - **L2** — *(resolvida na revisão)* SHA do upstream registrado na seção 1.
 - **L3** — Sem sessão KDE/Wayland real: nada sobre comportamento de janela, input, DPI ou atalhos foi observado.
 - **L4** — Documentação externa (KWin, LayerShellQt, portais) inacessível por rede; ver `ANIME-RISK-REGISTER.md` e ADR 002 (fontes secundárias, não verificadas).
