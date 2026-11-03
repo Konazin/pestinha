@@ -8,7 +8,8 @@
 | Item | Valor | Fonte |
 |---|---|---|
 | Repositório auditado | `Konazin/pestinha` (remoto `origin`) | `git remote -v` |
-| Upstream citado no pedido | `mille-okws/pestinha` | **não verificável aqui**: o SHA do upstream não foi consultado (escopo GitHub limitado a `konazin/pestinha`) |
+| Upstream (fork de origem) | `mille-okws/pestinha`, branch `main` | `git ls-remote https://github.com/mille-okws/pestinha HEAD refs/heads/main` |
+| SHA do upstream | `4898787cb5128bea81a57894c30607477d2f9818` (HEAD e `refs/heads/main`), **idêntico** ao `main` de `Konazin/pestinha` e à base deste PR | `git ls-remote` do upstream e do fork, 2026-11-03 |
 | Branch | `claude/pestinha-anime-m0-audit-35whxi` | `git status -sb` |
 | SHA base (HEAD) | `4898787cb5128bea81a57894c30607477d2f9818` — "Merge pull request #6 from tiosoaress/isaac-contribuicao" | `git rev-parse HEAD` |
 | Versão do projeto | `0.7.0`, `requires-python >=3.11`, GPL-3.0-or-later | `pyproject.toml` |
@@ -19,7 +20,7 @@
 | Sessão gráfica | nenhuma (`WAYLAND_DISPLAY`/`DISPLAY` vazios) | `env` |
 | Ferramentas presentes | `ruff`, `flake8`, `mypy` (não usados: o projeto só configura pyflakes); `dbus-send` | `which` |
 | Ferramentas ausentes | `kwin_wayland`, `qdbus` | `which` |
-| Plano normativo `PLANO-PESTINHA-ANIME-v1.1.md` | **ausente** do workspace/repositório | `find` — ver lacuna L1 |
+| Plano normativo `PLANO-PESTINHA-ANIME-v1.1.md` | **ausente** do workspace, do repositório, das duas branches e do restante do sistema de arquivos (busca repetida na revisão) | `find / -iname '*PLANO-PESTINHA*'` — ver lacuna L1 |
 
 Ambiente temporário: venv fora do repo (`<scratchpad>/venv`) com `PySide6==6.11.3 psutil numpy pytest==8.4.2
 pyflakes==4.1.0` (as mesmas versões fixadas pelo CI/`requirements.txt`) e, no contêiner, pacotes apt
@@ -100,6 +101,19 @@ atual consome apenas `PetState` (`emotion`, `shape`, `gaze`, `shake`, `tone`, `s
 lendo `PetState`/`Body` sem tocar em `core/`.** Qualquer alteração em topologia, pesos, `MOTOR_SPEC`,
 `CONNECTIONS`, schemas de `memory/` ou regras de aprendizado está fora de escopo.
 
+## 5.1 Decisões aprovadas (registro)
+
+Seis decisões aprovadas pelo proprietário, transcritas do pedido do M0 (a conferir contra o plano normativo quando ele estiver disponível):
+
+| # | Decisão aprovada |
+|---|---|
+| D1 | Alvo inicial: Debian 13, KDE Plasma 6, Wayland. Não alegar compatibilidade com todos os compositores. |
+| D2 | Identidade visual inicial: anime SD premium; a arte final não é criada agora. |
+| D3 | Primeiro renderer planejado: sprites; Inochi2D só como possível evolução. |
+| D4 | Preservar a SNN original: sem alteração de topologia, pesos, schemas ou regras de aprendizado. |
+| D5 | Wayland deve ser validado em KDE real antes da produção de assets finais. |
+| D6 | A autorização termina em M0: parar ao entregar o PR documental e o relatório. |
+
 ## 6. Acoplamentos confirmados (fatos)
 
 | # | Fato | Onde |
@@ -107,7 +121,7 @@ lendo `PetState`/`Body` sem tocar em `core/`.** Qualquer alteração em topologi
 | F1 | Posição do pet = `QWidget.move()` de uma janela top-level, todo quadro | `body/pet.py` `PetWindow.animate` |
 | F2 | Renderização e hit-testing estão no mesmo `QWidget` (`paintEvent` + eventos de mouse) | `body/pet.py` |
 | F3 | Flags: `FramelessWindowHint | Tool | WindowStaysOnTopHint | WindowDoesNotAcceptFocus` + `WA_TranslucentBackground`, `WA_ShowWithoutActivating` | `overlay_flags()` |
-| F4 | Click-through só por pixel transparente (comentário do módulo) e `Qt.WindowTransparentForInput` nos fogos; **não há `setMask` nem região de input explícita** | `body/pet.py`, `world/fireworks.py` |
+| F4 | O docstring de `body/pet.py` afirma que "pixels transparentes deixam o clique passar"; só os fogos usam `Qt.WindowTransparentForInput`; **não há `setMask` nem região de input explícita** (grep). Essa afirmação é comportamento observado/esperado em Windows/X11 e **não deve ser assumida em Wayland** — ver `ANIME-RISK-REGISTER.md` R2 | `body/pet.py`, `world/fireworks.py` |
 | F5 | Posição do cursor global por `QCursor.pos()` | `body/pet.py` `cursor_pos()` |
 | F6 | Identificação de janelas por `int(widget.winId())` para excluí-las de `janelas_visiveis` | `app.py` `scan_windows`, `ui/float_manager.py` `visible_handles` |
 | F7 | `scan_windows` usa o `devicePixelRatio` **só da tela primária** para converter todas as janelas | `app.py` `scan_windows` |
@@ -120,8 +134,8 @@ lendo `PetState`/`Body` sem tocar em `core/`.** Qualquer alteração em topologi
 
 ## 7. Lacunas
 
-- **L1** — `PLANO-PESTINHA-ANIME-v1.1.md` não foi fornecido; objetivos de M1–M7 neste repositório vêm do texto do pedido, não do plano.
-- **L2** — SHA do upstream `mille-okws/pestinha` não registrado (sem acesso); registrado o HEAD do repositório de trabalho.
+- **L1** — `PLANO-PESTINHA-ANIME-v1.1.md` ainda não foi fornecido. Os marcos de `ANIME-ROADMAP.md` são uma **proposta provisória**, não o roadmap normativo; a reconciliação está **pendente**.
+- **L2** — *(resolvida na revisão)* SHA do upstream registrado na seção 1.
 - **L3** — Sem sessão KDE/Wayland real: nada sobre comportamento de janela, input, DPI ou atalhos foi observado.
 - **L4** — Documentação externa (KWin, LayerShellQt, portais) inacessível por rede; ver `ANIME-RISK-REGISTER.md` e ADR 002 (fontes secundárias, não verificadas).
 - **L5** — Versões de Qt/Plasma do Debian 13 não medidas aqui; qualquer número é **[HIPÓTESE]** a confirmar na máquina-alvo (`apt policy`, `kwin_wayland --version`, `qtpaths6`).

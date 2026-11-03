@@ -41,4 +41,20 @@ Pré-requisitos a registrar: `cat /etc/os-release`, `plasmashell --version`, `kw
 | B19 | Persistência | Fechar e reabrir | `memory/pets/<id>/` íntegro; SNN inalterada | NOT TESTED |
 | B20 | Estabilidade | 1 h rodando | Sem vazamento/queda de FPS relevante | NOT TESTED |
 
+### B.1 Transparência visual × região de entrada (superfícies grandes)
+
+Transparência visual (alfa dos pixels) **não** implica passagem de cliques. Estes testes separam as duas
+coisas e cobrem o caso de uma superfície grande (ex.: uma por monitor, em tela cheia) sobre a área de trabalho.
+Usar um retângulo/silhueta de teste descartável fora de `pestinha/`.
+
+| ID | Teste | Passos | Critério PASS | Resultado |
+|---|---|---|---|---|
+| B21 | Superfície grande 100% transparente, **sem** região de entrada definida | Cobrir um monitor inteiro; clicar em ícones/janelas abaixo | Registrar se os cliques passam. (Hipótese: não passam só por serem transparentes) | NOT TESTED |
+| B22 | Superfície grande com região de entrada **vazia** | Idem, com `input region` vazia | Todos os cliques chegam às janelas abaixo; arrastar, rolar e clicar com o botão direito também | NOT TESTED |
+| B23 | Superfície grande com região = silhueta do pet | Clicar na silhueta e fora, nos quatro cantos e nas bordas | Dentro: pet recebe; fora: abaixo recebe; sem faixa morta nas bordas anti-aliased | NOT TESTED |
+| B24 | Região de entrada acompanhando o pet em movimento | Pet andando e sendo arrastado; clicar fora do rastro | Sem atraso que deixe o clique "no lugar antigo"; custo por quadro medido | NOT TESTED |
+| B25 | Superfície grande em 2 monitores / escalas mistas | Uma superfície por saída | Região correta em cada saída; sem bloquear o monitor vizinho | NOT TESTED |
+| B26 | Rolagem, hover e foco sob a superfície grande | Rolar página, passar o mouse em botões, digitar | Nada é interceptado; foco intacto (B8) | NOT TESTED |
+| B27 | Comparação com X11/XWayland | Repetir B21-B22 com `xcb` | Registrar diferença de comportamento | NOT TESTED |
+
 Cada execução deve anexar: data, versões, comando, log/vídeo curto e veredito.

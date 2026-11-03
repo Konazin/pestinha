@@ -15,7 +15,7 @@
 ## O que está documentado vs. o que não está provado
 
 Fontes: **conhecimento prévio e uma busca secundária**; os sites oficiais (develop.kde.org, wayland.app,
-flatpak.github.io) estavam fora da rede permitida desta sessão. Tudo abaixo é **não verificado
+flatpak.github.io) estavam fora da rede permitida desta sessão (ver *Referências oficiais* abaixo, **não consultadas**). Tudo abaixo é **não verificado
 contra a documentação oficial** e deve ser conferido no M1.
 
 | Tema | Entendimento atual | Status |
@@ -35,6 +35,13 @@ escalas diferentes; (3) regiões de clique dinâmicas sem custo/flicker; (4) com
 tela de bloqueio; (5) PySide6 6.11.3 (wheel, Qt embarcado) × Qt/plugins do sistema Debian (platform plugin
 Wayland, `libQt6WaylandClient`); (6) identificar a própria janela no KWin **sem** ler títulos
 (usar `resourceClass`/`desktopFileName` próprios).
+
+## Transparência visual × região de entrada
+
+São mecanismos distintos. Alfa/`WA_TranslucentBackground` decide como a superfície **aparece**; a *input region*
+da superfície decide quem **recebe** o mouse. O docstring de `body/pet.py` assume que pixel transparente deixa o
+clique passar, o que é comportamento de Windows/X11 e **não está provado em KDE Wayland**. Qualquer alternativa
+com superfície grande (Alt 2) depende de região de entrada correta; ver testes B21–B27 da matriz e o risco R2.
 
 ## Alternativas
 
@@ -64,3 +71,23 @@ interna do KWin por versão. Pode ser **combinada** com Alt 2 apenas para leitur
 ## Decisão
 
 Nenhuma. Selecionar somente após evidência PASS de M1 e aprovação do proprietário.
+
+## Referências oficiais
+
+**Nenhuma das páginas abaixo foi aberta nesta sessão** (hosts fora da rede permitida; endereços vêm de
+conhecimento prévio e devem ser conferidos no M1, inclusive a versão aplicável ao Plasma/Qt do Debian 13).
+A coluna "Documentado" indica o que a referência *deveria* especificar; "Não testado" é o que o projeto ainda
+precisa provar em KDE real.
+
+| Área | Referência (a conferir) | Documentado (especificação) | Ainda não testado / não provado |
+|---|---|---|---|
+| KWin Scripting | https://develop.kde.org/docs/plasma/kwin/ e https://develop.kde.org/docs/plasma/kwin/api/ | API de scripts JS (janelas, geometria, `callDBus`), carregamento via `org.kde.KWin.Scripting` | IPC KWin↔Python estável; latência a 60 Hz; mover a janela do pet por script; identificar a própria janela sem ler títulos |
+| KWin (bugs, fonte secundária) | https://bugs.kde.org/show_bug.cgi?id=475847 (assinar sinais D-Bus), https://bugs.kde.org/show_bug.cgi?id=434808 (segurança de `callDBus`) | Relatos de que scripts não assinam sinais nem criam serviços; podem chamar D-Bus arbitrário | Se isso vale na versão do Plasma 6 do Debian 13 |
+| Qt / PySide6 | https://doc.qt.io/qt-6/wayland-and-qt.html, https://doc.qt.io/qt-6/qwindow.html#setMask, https://doc.qt.io/qt-6/highdpi.html, https://doc.qt.io/qtforpython-6/ | Plugin de plataforma `wayland`, `QWindow::setMask`, tratamento de DPI/escala | Que `setMask` vire *input region* Wayland no Qt 6.11.3 da wheel; custo por quadro; plugins da wheel × Qt do sistema; escala fracionária |
+| Wayland (núcleo) | https://wayland.freedesktop.org/docs/html/ (`wl_surface.set_input_region`) | Região de entrada é propriedade da superfície, separada do conteúdo visual | Comportamento do KWin com regiões grandes/dinâmicas (B21–B27) |
+| xdg-shell | https://gitlab.freedesktop.org/wayland/wayland-protocols/-/blob/main/stable/xdg-shell/xdg-shell.xml | Modelo de toplevels; o cliente não define posição global | Confirmar o efeito de `move()` no Qt Wayland sob KWin (B3) |
+| layer-shell / LayerShellQt | https://gitlab.freedesktop.org/wlroots/wlr-protocols/-/blob/master/unstable/wlr-layer-shell-unstable-v1.xml e https://invent.kde.org/plasma/layer-shell-qt | Camadas, âncoras, zona exclusiva, interatividade de teclado por saída | Suporte e comportamento no KWin do Debian 13; **binding Python** (LayerShellQt é C++); camada overlay × fullscreen e lockscreen |
+| XDG GlobalShortcuts | https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.GlobalShortcuts.html | `CreateSession`, `BindShortcuts`, sinal `Activated` | Backend KDE disponível no Debian 13; confirmação do usuário; atalho do pânico via portal |
+
+Regra: o que está na coluna "Documentado" é especificação a ser **confirmada lendo a fonte**; nada na coluna
+"Ainda não testado" pode ser tratado como funcionando.
