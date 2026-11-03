@@ -63,3 +63,20 @@ referência; isso **não foi verificável**.
 1. Disponibilizar `docs/plans/PLANO-PESTINHA-ANIME-v1.1.md` no workspace (C1).
 2. Reexecutar C2–C12 contra o texto do plano e registrar qualquer divergência como `PROPOSTA`.
 3. Conferir as referências oficiais do ADR 002 (rede liberada ou verificação manual).
+
+## 6. Atualização v1.2 (roadmap M0–M8)
+
+Fonte: mensagem do proprietário. **Os arquivos do plano v1.1/v1.2 continuam ausentes**; esta atualização **não é
+reconciliação literal** e nada aqui afirma ter conferido o texto de um plano.
+
+| # | Requisito | Documento | Status |
+|---|---|---|---|
+| V1 | PR #1 mergeado antes de nova branch | `main` @ `49bd725` | Conforme |
+| V2 | Marcos M0–M8 com os nomes aprovados | `ANIME-ROADMAP.md` | Conforme |
+| V3 | Decisões D1–D8 registradas (garota anime SD, sprites 2D, Inochi2D futuro, validar Wayland antes da arte, incremental, local/offline) | `ANIME-ROADMAP.md` | Conforme |
+| V4 | M8 como planejamento futuro, sem implementação | `ANIME-M8-AGENTES.md` | Conforme |
+| V5 | Claude Code, Codex CLI e AGY (sujeito a verificação); estados; adaptadores independentes; eventos padronizados; local; simultâneos; sem leitura de dados privados; sem aprovação automática | `ANIME-M8-AGENTES.md` | Conforme (interfaces **não verificadas**) |
+| V6 | ADR 001 e 002 `Proposed` (não editados nesta branch) | `docs/adr/` | Conforme |
+| V7 | Sem cópia fiel de documento ausente | — | Conforme |
+| V8 | Sem alteração de código, testes, dependências, schemas, persistência ou SNN | diff | Conforme (ver verificação no PR) |
+| V9 | Conferência literal com plano v1.1/v1.2 | — | **Não verificável** |
