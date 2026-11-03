@@ -27,6 +27,15 @@ Nenhuma ferramenta nova foi necessária. Nada acima foi alterado nesta etapa.
 | 2026-11-03 | Proprietário | Movimentação e funcionamento "aparentemente normais" em XWayland | Observação visual, sem critério | T07/T10: **não promovido a PASS** |
 | 2026-11-03 | Proprietário | Wayland nativo: objetos concentrados no centro, sem seguir a física | Observação visual | T09/T11: indício, **não FAIL registrado** |
 
+### 2.1 Teste do launcher pelo proprietário (informal) e problema visual conhecido
+
+| Data | Declarado | Situação |
+|---|---|---|
+| 2026-11-03 | Launcher testado em sessão real: funcionamento aparentemente correto | Indício; a linha "Launcher" da matriz continua `NOT TESTED` (sem critério nem log) |
+| 2026-11-03 | **O notebook não apareceu.** Posição salva em `memory`: `[519, 1228]` | **Problema visual conhecido, não bloqueante.** Não investigado e sem alteração de código nesta etapa; causa desconhecida (nenhuma hipótese é afirmada aqui) |
+
+**O M1-X NÃO está integralmente aprovado.** Os demais testes da seção 3 seguem pendentes.
+
 ## 3. Matriz M1-X (todos `NOT TESTED`)
 
 Comandos a partir de `diagnostico/m1/` com o venv do M1 (ver `RUNBOOK-M1.md` §1). Critérios completos em [`MATRIZ-M1.md`](MATRIZ-M1.md).

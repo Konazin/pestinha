@@ -9,9 +9,10 @@ A janela nunca pega o foco (o teclado continua no seu programa).
 import math
 import random
 import time
+from types import MappingProxyType
 
-from PySide6.QtCore import QRect, QRectF, Qt, Signal
-from PySide6.QtGui import QCursor, QFont, QPainter
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QCursor, QPainter
 from PySide6.QtWidgets import QWidget
 
 from ..config import EMOTION_NAMES
@@ -28,9 +29,8 @@ from ..ajustes import (
     DESLOCAMENTO_CARINHO as RUB_MIN_TRAVEL,
 )
 
-from .desenho_rosto import BODY_H, BODY_W, PADRAO, draw_face, draw_zzz, lerp_shape
-
-CX, CY = WIN / 2, WIN / 2 - 6   # centro do corpo dentro da janela
+from .desenho_rosto import BODY_H, BODY_W, PADRAO, lerp_shape
+from .renderer import CX, CY, QuadroPet, VetorialLegado
 
 
 
@@ -74,6 +74,7 @@ class PetWindow(QWidget):
         self.body = Body(x, y, BODY_W / 2, BODY_H / 2)
         self.state = state
         self.aparencia = PADRAO      # cores e acessórios do pet (pets/<pet>.json)
+        self.renderer = VetorialLegado()    # quem desenha o quadro (trocável: ver docs/ANIME-RENDERER-EXTENSAO.md)
         self.next_blink = time.monotonic() + random.uniform(2.0, 5.0)
 
         self._press = None          # (pos global, tempo)
@@ -130,15 +131,13 @@ class PetWindow(QWidget):
         self.move(int(self.body.x - CX), int(self.body.y - CY))
         self.update()
 
-    def paintEvent(self, _event):
-        """Desenha o pet: corpo, olhos, acessórios e balanço; some atrás da tampa do notebook quando está sentado."""
-        p = QPainter(self)
-        p.setRenderHint(QPainter.Antialiasing)
+    def quadro(self, now):
+        """Fotografia do que o pet mostra agora: sorteio (tremor) e relógio entram aqui, o renderer só pinta."""
         st = self.state
+        corte = None
         if st.desk_top is not None:
             # sentado: o corpo some atrás da tampa do notebook (corta no nível dela, não depende da ordem das janelas)
-            corte = int(st.desk_top - self.y())
-            p.setClipRect(QRect(0, 0, self.width(), max(0, min(self.height(), corte))))
+            corte = max(0, min(self.height(), int(st.desk_top - self.y())))
         shake = st.shake
         jitter_x = random.uniform(-shake, shake) if shake else 0.0
         jitter_y = random.uniform(-shake, shake) if shake else 0.0
@@ -146,24 +145,21 @@ class PetWindow(QWidget):
         # SETTLE: balança devagarinho, de boa; a amplitude é a atividade da população
         sway = 0.0
         if self.body.grounded and st.emotion != "dormindo":
-            sway = st.tone.sway() * math.sin(time.monotonic() * 2.2)
+            sway = st.tone.sway() * math.sin(now * 2.2)
         if st.emotion == "dormindo":
-            jitter_y += 1.5 * math.sin(time.monotonic() * 1.6)     # respirando devagar
+            jitter_y += 1.5 * math.sin(now * 1.6)     # respirando devagar
+        return QuadroPet(
+            shape=MappingProxyType(dict(st.shape)), gaze=tuple(st.gaze), blink=0.08 if now < st.blink_until else 1.0,
+            emocao=st.emotion, carinho=st.feliz_fechado(now), aparencia=self.aparencia,
+            angulo=self.body.angle + sway, jitter=(jitter_x, jitter_y), agora=now, corte_y=corte,
+            rotulo=EMOTION_NAMES.get(st.emotion, st.emotion) if st.show_label else None,
+        )
 
-        p.save()
-        p.translate(CX + jitter_x, CY + jitter_y)
-        p.rotate(self.body.angle + sway)
-        blink = 0.08 if time.monotonic() < st.blink_until else 1.0
-        draw_face(p, st.shape, st.gaze, blink, st.emotion, carinho=st.feliz_fechado(), aparencia=self.aparencia)
-        p.restore()
-
-        if st.emotion == "dormindo":
-            draw_zzz(p, CX + jitter_x, CY + jitter_y, time.monotonic(), self.aparencia.olho)
-
-        if st.show_label:
-            p.setPen(self.aparencia.olho)
-            p.setFont(QFont("Consolas", 9, QFont.Bold))
-            p.drawText(QRectF(0, WIN - 22, WIN, 20), Qt.AlignCenter, EMOTION_NAMES.get(st.emotion, st.emotion))
+    def paintEvent(self, _event):
+        """Desenha o pet: monta o quadro e entrega ao renderer."""
+        p = QPainter(self)
+        p.setRenderHint(QPainter.Antialiasing)
+        self.renderer.desenhar(p, self.quadro(time.monotonic()))
         p.end()
 
     # ---------------- mouse ----------------

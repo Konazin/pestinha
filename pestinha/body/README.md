@@ -14,4 +14,5 @@ O corpo do pet: a janela com o rosto, o estado que ele mostra, o comportamento (
 | `desenho_rosto.py` | Só o que se desenha do pet: moldura, olhos, brilho, acessórios e os Zzz. |
 | `pet.py` | A telinha com olhinhos: janela transparente, desenho e mouse. |
 | `pet_state.py` | O que o pet está sentindo e mostrando, num lugar só. |
+| `renderer.py` | Desenha o pet a partir de um QuadroPet, sem estado, sem sorteio e sem relógio. |
 | `toy.py` | A bolinha dele. |
