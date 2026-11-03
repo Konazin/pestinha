@@ -35,11 +35,13 @@ app inteiro usam um relógio virtual: avançam o tempo sem esperar.
 | `test_festa.py` | Fogos de artifício ligados à rede e brincadeira mais animada quando feliz. |
 | `test_homeostase.py` | Homeostase: trabalhar é estímulo, então o tédio não sobe enquanto ele programa. |
 | `test_jorge.py` | Etapa 4 do multipet: o Jorge, segundo personagem, feito só de configuração e conteúdo. |
+| `test_lancador_xwayland.py` | Launcher XWayland (lancadores/pestinha_xwayland.py): só monta o ambiente do processo filho. |
 | `test_mesa.py` | Notebook: sentar e levantar pelo disparo do neurônio SENTAR. |
 | `test_migracao.py` | Etapa 1 do multipet: memória por pet (memory/pets/<pet>/) e a migração da versão antiga. |
 | `test_nucleo.py` | Testes dos módulos puros: nada de Qt, nada de Windows. |
 | `test_paineis.py` | Painéis do menu (monitor neural e painel de protesto): abrir à mão deve manter o painel na tela. |
 | `test_pedido.py` | Pedir para trabalhar: o neurônio SENTAR decide. |
 | `test_plataforma.py` | Plataforma: cada sistema expõe as mesmas funções, e as leituras de texto (wmctrl, xdotool, ioreg, janelas do Quartz) são testadas com saídas de exemplo, em qualquer sistema. |
+| `test_renderer_vetorial.py` | Etapa 1 do renderer (docs/ANIME-RENDERER-EXTENSAO.md): o desenho do pet saiu do PetWindow.paintEvent para body/renderer.py (QuadroPet + VetorialLegado), sem mudar nenhum pixel. |
 | `test_robustez.py` | Robustez: arquivo corrompido, assets faltando, log em arquivo. |
 | `test_robustez_v2.py` | Falhas do relatório técnico (docs/auditorias/ANALISE_TECNICA.md): cada caso tem um teste que reproduz o problema. |

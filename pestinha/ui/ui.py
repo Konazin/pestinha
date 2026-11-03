@@ -26,7 +26,7 @@ from PySide6.QtWidgets import (
 from .. import config
 from ..sense import timeline
 from ..core.emotion import EYE_SHAPES
-from ..body.pet import draw_face
+from ..body.desenho_rosto import draw_face
 
 STYLE = """
 QDialog { background: #0c1f13; }

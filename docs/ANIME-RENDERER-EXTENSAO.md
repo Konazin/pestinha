@@ -1,6 +1,8 @@
 # Próximo marco gráfico — pontos de extensão para o renderer de sprites (planejamento)
 
-> **Somente planejamento.** Nada aqui foi implementado nem testado. Complementa o ADR 001 (`Proposed`) e o marco M3
+> **Status:** a etapa 1 (extração do `VetorialLegado` e do `QuadroPet`) foi implementada em `pestinha/body/renderer.py`, com teste de equivalência de pixel (`tests/test_renderer_vetorial.py`, `offscreen`: **não** valida a execução gráfica em XWayland). As etapas 2–5 seguem como planejamento; o contrato final abaixo é a proposta original, e o código atual é o mínimo da etapa 1 (`desenhar` e `tamanho`; sem `regiao_opaca`, que só entra se o M1-X mostrar necessidade). Não há sprites nem assets.
+>
+> **Planejamento original:** nada abaixo da etapa 1 foi implementado nem testado. Complementa o ADR 001 (`Proposed`) e o marco M3
 > do roadmap. **Não** inclui a personagem, arte, nem mudanças em `core/` (SNN), física, emoções ou memória.
 > Referências de linha são do `main` em 2026-11-03 e podem mudar.
 
