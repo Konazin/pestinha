@@ -1,2 +1,4 @@
 out/
 __pycache__/
+# pacotes gerados por empacotar_resultados.sh (podem conter logs da máquina do usuário)
+m1-resultados-*.tar.gz

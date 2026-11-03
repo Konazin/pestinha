@@ -10,7 +10,8 @@
 | Arquivo | Para quê |
 |---|---|
 | [`RUNBOOK-M1.md`](RUNBOOK-M1.md) | Passo a passo para executar as 10 investigações, comandos, coleta de logs e relatório |
-| [`MATRIZ-M1.md`](MATRIZ-M1.md) | Testes T01–T40 com critério objetivo e resultado `NOT TESTED` |
+| [`MATRIZ-M1.md`](MATRIZ-M1.md) | Testes T01–T43 com critério objetivo e resultado `NOT TESTED` |
+| [`SEMANTICA-REGIAO-ENTRADA.md`](SEMANTICA-REGIAO-ENTRADA.md) | Transparência × máscara Qt × input region Wayland; como ler `mask-vazia-qt` e seus limites |
 | [`ALTERNATIVAS-SE-MOVE-FALHAR.md`](ALTERNATIVAS-SE-MOVE-FALHAR.md) | Opções se `QWidget.move()` não posicionar a janela (sem escolher nenhuma) |
 | [`CRITERIOS-APROVACAO.md`](CRITERIOS-APROVACAO.md) | Gates para seguir ao M2 (propostos; o proprietário aprova) |
 | [`../../diagnostico/m1/`](../../diagnostico/m1/) | Ferramentas isoladas de diagnóstico (scripts) |

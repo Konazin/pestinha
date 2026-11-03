@@ -14,7 +14,7 @@ registradas. `offscreen`, Xvfb, CI e VM sem KDE real **não contam**.
 |---|---|---|---|
 | G1 — Compatibilidade Qt | PySide6 6.11.3 inicia em `wayland` e `xcb` sem abort; sem mistura de Qt | T02–T04 | NOT TESTED |
 | G2 — Posicionamento | **Pelo menos um** método de posicionamento programático PASS (visual), em monitor único, em 12 passos consecutivos sem falha; o método é identificado (ex.: `move()`, XWayland, superfície interna) | T06–T13 | NOT TESTED |
-| G3 — Entrada do mouse | Em superfície grande: com região = silhueta, 20/20 cliques fora passam e 20/20 dentro são capturados; região dinâmica com `setMask p95 ≤ 4 ms` e `máx ≤ 16 ms` — **ou** método equivalente documentado | T17–T22 | NOT TESTED |
+| G3 — Entrada do mouse | Em superfície grande: com região = silhueta, 20/20 cliques fora passam e 20/20 dentro são capturados; região dinâmica com `setMask p95 ≤ 4 ms` e `máx ≤ 16 ms` — **ou** método equivalente documentado | T17–T22, T41–T43 | NOT TESTED |
 | G4 — Foco | 0 caracteres perdidos em 20 digitados; nenhum `FOCO_GANHO` indevido | T31 | NOT TESTED |
 | G5 — Sessão | **Não** aparece sobre a tela de bloqueio; volta após desbloquear; comportamento em fullscreen registrado | T28–T30 | NOT TESTED |
 | G6 — Monitores/escala | Atravessa monitores em 100% e 150% e em escala fracionária com erro visual ≤ 2 px lógicos; ou limitações documentadas e aceitas | T24–T27 | NOT TESTED |

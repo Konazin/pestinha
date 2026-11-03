@@ -83,14 +83,28 @@ e ficam em `eventos.jsonl` (`clique_recebido`).
 # janela pequena
 timeout --signal=INT 45 python3 sonda_janela.py --plataforma wayland --modo regiao --regiao nenhuma --tempo 35
 # superfície grande (CUIDADO: pode bloquear cliques até fechar)
-timeout --signal=INT 30 python3 sonda_janela.py --plataforma wayland --modo regiao --regiao nenhuma           --grande --tempo 20
-timeout --signal=INT 30 python3 sonda_janela.py --plataforma wayland --modo regiao --regiao mask-vazia        --grande --tempo 20
-timeout --signal=INT 30 python3 sonda_janela.py --plataforma wayland --modo regiao --regiao mask-central      --grande --tempo 20
+timeout --signal=INT 30 python3 sonda_janela.py --plataforma wayland --modo regiao --regiao nenhuma            --grande --tempo 20
+timeout --signal=INT 30 python3 sonda_janela.py --plataforma wayland --modo regiao --regiao mask-central       --grande --tempo 20
+timeout --signal=INT 30 python3 sonda_janela.py --plataforma wayland --modo regiao --regiao mask-minima        --grande --tempo 20
+timeout --signal=INT 30 python3 sonda_janela.py --plataforma wayland --modo regiao --regiao mask-removida      --grande --tempo 24
 timeout --signal=INT 30 python3 sonda_janela.py --plataforma wayland --modo regiao --regiao transparente-input --grande --tempo 20
-timeout --signal=INT 40 python3 sonda_janela.py --plataforma wayland --modo regiao --regiao dinamica         --grande --tempo 30
+timeout --signal=INT 30 python3 sonda_janela.py --plataforma wayland --modo regiao --regiao mask-vazia-qt      --grande --tempo 20   # INFORMATIVO (T19)
+timeout --signal=INT 40 python3 sonda_janela.py --plataforma wayland --modo regiao --regiao dinamica          --grande --tempo 30
 # comparação com XWayland
-timeout --signal=INT 30 python3 sonda_janela.py --plataforma xcb --modo regiao --regiao nenhuma   --grande --tempo 20
-timeout --signal=INT 30 python3 sonda_janela.py --plataforma xcb --modo regiao --regiao mask-vazia --grande --tempo 20
+timeout --signal=INT 30 python3 sonda_janela.py --plataforma xcb --modo regiao --regiao nenhuma       --grande --tempo 20
+timeout --signal=INT 30 python3 sonda_janela.py --plataforma xcb --modo regiao --regiao mask-vazia-qt --grande --tempo 20
+```
+
+**Atenção à semântica:** `mask-vazia-qt` é uma região **Qt** vazia e **não** equivale a uma input region Wayland
+vazia (o Qt pode tratá-la como "sem máscara"). Para uma região "quase nula" confiável use `mask-minima`; para
+"máscara removida" use `mask-removida`. Leia [`SEMANTICA-REGIAO-ENTRADA.md`](SEMANTICA-REGIAO-ENTRADA.md).
+
+**Evidência do que o Qt enviou (T43)** — repita as variantes de interesse com `WAYLAND_DEBUG` e extraia as requisições:
+```bash
+mkdir -p out
+WAYLAND_DEBUG=client timeout --signal=INT 30 python3 sonda_janela.py --plataforma wayland \
+    --modo regiao --regiao mask-vazia-qt --grande --tempo 20 2> out/wayland-debug-mask-vazia.log
+./extrair_input_region.sh out/wayland-debug-mask-vazia.log
 ```
 Para transparência pura use `--tinta 0` (sem véu): o objetivo é ver se pixels totalmente transparentes deixam o
 clique passar. Em `dinamica`, `resumo.json` traz `setMask_ms` (média, p95, máx.): orçamento de quadro = 16 ms.
@@ -125,6 +139,21 @@ Revise o `.tar.gz`/`out/` (e remova o que não quiser compartilhar) antes de env
 usam `QT_DEBUG_PLUGINS=1`; para detalhe extra de protocolo Wayland (muito verboso, manual):
 `WAYLAND_DEBUG=1 python3 sonda_janela.py ... 2> wayland-debug.log` (contém tráfego de protocolo; revisar).
 
+### 3.1 Códigos de saída e arquivos de resultado
+| Código | Significado | Arquivos |
+|---|---|---|
+| 0 | execução completa (**não** é PASS) | `eventos.jsonl` (último evento `saida`), `resumo.json` com `status=concluido` |
+| 1 | erro inesperado | `resumo.json` com `status=erro` e traceback; `eventos.jsonl` com `ERRO` |
+| 2 | argumentos inválidos | nenhum resultado |
+| 3 | o **vigia** forçou a saída (processo travado) | `resumo.json` com `status=vigia_forcou_saida`; evento `VIGIA_FORCOU_SAIDA` |
+| 4 | interrompido (Ctrl+C/SIGTERM, inclusive durante as perguntas) | `resumo.json` com `status=interrompido` (dados parciais) |
+| 134/139 | abort/segfault do Qt (ex.: `wayland` sem compositor ⇒ −6) | veja `qt_debug_plugins_*.log` / `stderr` |
+
+`resumo.json` é gravado de forma atômica (arquivo temporário + troca). O **vigia** é uma thread *daemon* que só dispara se
+o processo não terminar em `--tempo` + margem (8 s; 10 s em `sonda_ciclo`); é cancelado no encerramento normal e não adia a saída.
+`rodar_pestinha_original.sh` devolve o código do app (0, 124 = estourou o tempo, 130/143 = Ctrl+C/SIGTERM, 134 = abort) e sempre
+fecha `cabecalho.txt` (`rc=`) e remove a cópia temporária, inclusive em Ctrl+C.
+
 ## 4. Relatório
 Preencha a coluna "Resultado" da matriz (`PASS`/`FAIL`/`NOT TESTED`) com o nome do arquivo de evidência.
 Regras: sessão não-KDE-Wayland ⇒ `NOT TESTED` (inválido); falta de recurso/permissão ⇒ `NOT TESTED` com motivo;
@@ -133,6 +162,6 @@ Regras: sessão não-KDE-Wayland ⇒ `NOT TESTED` (inválido); falta de recurso/
 
 ## 5. Limitações conhecidas das sondas
 - O autorrelato de posição em Wayland é o pedido do Qt, não a posição real (por isso a observação humana).
-- `setMask()` do `QWidget` → região de entrada Wayland é **hipótese** a confirmar (T20–T22).
+- `setMask()` do `QWidget` → região de entrada Wayland é **hipótese** a confirmar (T20–T22, T41–T43); máscara Qt vazia ≠ removida ≠ input region vazia (ver `SEMANTICA-REGIAO-ENTRADA.md`).
 - As sondas medem sua própria janela; não observam o Pestinha real em movimento contínuo (isso é T07/T09/T40).
 - Escalas fracionárias dependem de `wp_fractional_scale` e do Qt; o comportamento é o que se mede.

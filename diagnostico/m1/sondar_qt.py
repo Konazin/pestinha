@@ -5,6 +5,10 @@ Para cada plugin de plataforma pedido, roda um processo-filho que cria um QAppli
 platformName, telas (geometria, DPR, DPI) e de onde as bibliotecas Qt foram carregadas
 (wheel do PySide6 ou sistema). Um abort nativo num filho não derruba a sondagem.
 
+Códigos de saída (0 = coleta concluída e qt.json gravado; NÃO significa que as plataformas funcionam —
+leia `plataformas.<nome>.codigo_saida` em qt.json): 0 concluído · 1 PySide6 indisponível · 2 argumentos inválidos.
+Um filho que aborta (ex.: código −6 sem compositor) é registrado, não derruba a sondagem.
+
 Uso:  python3 sondar_qt.py [--plataformas xcb wayland] [--saida PASTA]
 """
 import argparse
@@ -15,7 +19,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _comum import ambiente_basico, libs_qt_carregadas, pasta_saida  # noqa: E402
+from _comum import ambiente_basico, escrever_json_atomico, libs_qt_carregadas, pasta_saida  # noqa: E402
 
 
 def filho(plataforma):
@@ -85,15 +89,18 @@ def main():
                 dados = json.loads(ultima)
             except ValueError:
                 dados = None
-            (pasta / f"qt_debug_plugins_{plat}.log").write_text(r.stderr[-20000:], encoding="utf-8")
+            (pasta / f"qt_debug_plugins_{plat}.log").write_text(r.stderr[-20000:], encoding="utf-8")  # fecha ao sair do with implícito
             resultado["plataformas"][plat] = {"codigo_saida": r.returncode, "dados": dados,
                                                "stderr_final": r.stderr.strip().splitlines()[-5:]}
         except subprocess.TimeoutExpired:
             resultado["plataformas"][plat] = {"codigo_saida": "timeout"}
-    (pasta / "qt.json").write_text(json.dumps(resultado, indent=2, ensure_ascii=False), encoding="utf-8")
+    codigo = 1 if "erro_pyside6" in resultado else 0
+    resultado["status"] = "pyside6_indisponivel" if codigo else "concluido"
+    resultado["codigo_saida"] = codigo
+    escrever_json_atomico(pasta / "qt.json", resultado)
     print(json.dumps(resultado, indent=2, ensure_ascii=False))
-    print(f"\nSalvo em {pasta}")
-    return 0
+    print(f"\nSalvo em {pasta / 'qt.json'} (código de saída={codigo}; 0 NÃO é PASS)")
+    return codigo
 
 
 if __name__ == "__main__":

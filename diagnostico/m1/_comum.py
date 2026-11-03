@@ -3,6 +3,7 @@ import json
 import os
 import platform
 import sys
+import threading
 import time
 from pathlib import Path
 
@@ -43,6 +44,9 @@ class Registro:
         self.arq = open(self.caminho, "a", encoding="utf-8", buffering=1)
 
     def evento(self, tipo, **campos):
+        reservados = {"t", "wall", "tipo"} & set(campos)
+        if reservados:   # nunca deixar um campo sobrescrever a estrutura do evento
+            raise ValueError(f"campos reservados no evento {tipo!r}: {sorted(reservados)}")
         linha = {"t": round(time.monotonic() - self.t0, 4), "wall": time.strftime("%H:%M:%S"), "tipo": tipo, **campos}
         self.arq.write(json.dumps(linha, ensure_ascii=False, default=str) + "\n")
         if self.eco:
@@ -53,13 +57,79 @@ class Registro:
 
 
 def perguntar(texto, opcoes=("s", "n", "nt")):
-    """Pergunta ao operador (stdin). `nt` = não testado. Sem terminal interativo devolve 'nt'."""
+    """Pergunta ao operador (stdin). `nt` = não testado. Sem terminal interativo ou em EOF devolve 'nt'.
+
+    Usa `sys.stdin.readline()` e NÃO `input()`: com PySide6 carregado, `input()` passa por um *input hook*
+    que mantém o Qt processando eventos (timers disparam) e engole o KeyboardInterrupt dentro dos slots,
+    deixando o Ctrl+C sem efeito. Ctrl+C propaga como KeyboardInterrupt; quem chama decide como finalizar
+    (ver `CODIGOS`).
+    """
     if not sys.stdin or not sys.stdin.isatty():
         return "nt"
     while True:
-        r = input(f"{texto} [{'/'.join(opcoes)}] ").strip().lower()
+        print(f"{texto} [{'/'.join(opcoes)}] ", end="", flush=True)
+        linha = sys.stdin.readline()
+        if linha == "":          # EOF
+            return "nt"
+        r = linha.strip().lower()
         if r in opcoes:
             return r
+
+
+# Códigos de saída das sondas Python. Atenção: código 0 significa "a sonda terminou e gravou os
+# arquivos", NUNCA "o teste passou". PASS/FAIL só existe na matriz, com evidência.
+CODIGOS = {
+    "concluido": 0,      # execução completa; resumo.json final gravado
+    "erro": 1,           # exceção inesperada (traceback em eventos.jsonl); resumo.json gravado
+    # 2 = argumentos inválidos (argparse, antes de criar qualquer arquivo)
+    "vigia_forcou_saida": 3,   # o vigia detectou travamento e encerrou o processo
+    "interrompido": 4,   # SIGINT/SIGTERM/Ctrl+C; resumo.json gravado com o que havia
+}
+
+
+def escrever_json_atomico(caminho, dados):
+    """Grava JSON em arquivo temporário e troca (nunca deixa resumo.json pela metade)."""
+    caminho = Path(caminho)
+    tmp = caminho.with_suffix(caminho.suffix + ".tmp")
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(dados, f, indent=2, ensure_ascii=False, default=str)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp, caminho)
+
+
+class Vigia:
+    """Proteção contra travamento: se não for cancelado a tempo, grava o estado e força a saída (código 3).
+
+    A thread é DAEMON e espera num `Event`: `cancelar()` a acorda e ela termina sem agir, então o
+    encerramento normal nunca é adiado nem convertido em saída forçada.
+    """
+
+    def __init__(self):
+        self._cancelado = threading.Event()
+        self._thread = None
+        self.disparou = False
+
+    def armar(self, segundos, ao_disparar=None, codigo=CODIGOS["vigia_forcou_saida"]):
+        def vigiar():
+            if self._cancelado.wait(segundos):
+                return                      # cancelado: saída normal, nada a fazer
+            self.disparou = True
+            try:
+                if ao_disparar:
+                    ao_disparar()
+            except Exception:
+                pass                        # o vigia nunca pode deixar de encerrar
+            finally:
+                os._exit(codigo)
+
+        self._thread = threading.Thread(target=vigiar, name="vigia-m1", daemon=True)
+        self._thread.start()
+
+    def cancelar(self):
+        self._cancelado.set()
+        if self._thread is not None and self._thread is not threading.current_thread():
+            self._thread.join(timeout=2)
 
 
 def libs_qt_carregadas():

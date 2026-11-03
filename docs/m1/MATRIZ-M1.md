@@ -1,5 +1,10 @@
 # Matriz de testes M1
 
+> **Região de entrada:** máscara Qt vazia ≠ máscara removida ≠ input region Wayland vazia. Leia
+> [`SEMANTICA-REGIAO-ENTRADA.md`](SEMANTICA-REGIAO-ENTRADA.md). O B22 do M0 ("região vazia") é detalhado aqui: T19 é
+> **informativo** (a máscara Qt vazia tem resultado indeterminado a priori); "entrada efetivamente vazia" é avaliada por
+> T21, T42 e T43.
+
 Legenda: **PASS** (observado, com evidência) · **FAIL** (observado e falhou) · **NOT TESTED** (não executado ou
 execução inválida). **Todos os testes estão `NOT TESTED`** — nenhuma sessão KDE Wayland real foi usada.
 Execução fora de KDE Wayland real (ver T01) não gera PASS/FAIL. "B##" refere-se à matriz do M0
@@ -43,9 +48,9 @@ Execução fora de KDE Wayland real (ver T01) não gera PASS/FAIL. "B##" refere-
 | T16 | B5 | Fundo transparente em `xcb` | idem | idem | idem | NOT TESTED |
 | T17 | B6 | Janela pequena, sem máscara: clique em área só-transparente | **registrar** se o clique chega embaixo (informativo; separa alfa de entrada) | — | `eventos.jsonl` | NOT TESTED |
 | T18 | B21 | Superfície grande, **sem** região | **registrar** (hipótese: bloqueia) | — | `eventos.jsonl` + operador | NOT TESTED |
-| T19 | B22 | Superfície grande, `mask-vazia` | ≥ 20 cliques fora chegam embaixo; `cliques_fora == 0` e `cliques_dentro == 0` | algum clique capturado | `resumo.json` | NOT TESTED |
-| T20 | B23 | Superfície grande, `mask-central` | ≥ 20 cliques **fora** passam (`cliques_fora==0`, operador `s`) **e** ≥ 20 **dentro** capturados (`cliques_dentro ≥ 20`, operador `s`) | clique fora capturado, ou dentro vazando | `resumo.json` | NOT TESTED |
-| T21 | B26 | `transparente-input` | todos os cliques passam; foco intacto | clique capturado | idem | NOT TESTED |
+| T19 | B22 | Superfície grande, `mask-vazia-qt` (região **Qt** vazia) | **Informativo — sem PASS/FAIL.** Classificar: (a) a sonda recebe cliques ⇒ consistente com o Qt tratar como "sem máscara"; (b) nenhum clique recebido e os cliques passam ⇒ consistente com entrada vazia efetiva (confirmar com T43); (c) indeterminado | — | `resumo.json` (`leitura_descritiva_mask_vazia`), T43 | NOT TESTED |
+| T20 | B23 | Superfície grande, `mask-central` | ≥ 20 cliques **fora** passam (`cliques_por_fase.com_mascara.fora==0`, operador `s`) **e** ≥ 20 **dentro** capturados (`cliques_por_fase.com_mascara.dentro ≥ 20`, operador `s`) | clique fora capturado, ou dentro vazando | `resumo.json` | NOT TESTED |
+| T21 | B26 | `transparente-input` (candidata a entrada vazia) | todos os cliques passam (`cliques_fora==0`, `cliques_dentro==0`); foco intacto | algum clique capturado | `resumo.json`, T43 | NOT TESTED |
 | T22 | B24 | Região dinâmica a 60 Hz | `setMask_ms.p95 ≤ 4 ms` e `max ≤ 16 ms`; operador `s` (clique segue o quadrado sem atraso perceptível) | acima dos limites ou clique no lugar antigo | `resumo.json` | NOT TESTED |
 | T23 | B27 | Mesmos T18/T19 em `xcb` | **registrar** diferença em relação ao `wayland` | — | idem | NOT TESTED |
 
@@ -79,5 +84,18 @@ Execução fora de KDE Wayland real (ver T01) não gera PASS/FAIL. "B##" refere-
 | T37 | — | *Binding* Python para LayerShellQt | **registrar** se existe caminho utilizável a partir de PySide6 | — | `layershell.txt` | NOT TESTED |
 | T38 | — | Plugin de layer-shell no Qt da wheel | **registrar** (observado ausente no contêiner remoto; reconfirmar) | — | `ambiente.txt` | NOT TESTED |
 | T39 | B16 | Portal XDG GlobalShortcuts presente | interface listada e versão lida | ausente | `kwin-dbus.txt` | NOT TESTED |
+
+
+## Região de entrada — controles e evidência de protocolo (acrescentados na revisão do PR #3)
+
+| ID | M0 | Teste | Critério PASS | Critério FAIL | Evidência | Resultado |
+|---|---|---|---|---|---|---|
+| T41 | B22 | Controle `mask-removida` (máscara central aplicada e depois `clearMask()`) | fase `com_mascara`: `fora==0` (cliques fora passam); fase `sem_mascara`: `fora>0` (a entrada total volta) | máscara sem efeito (`com_mascara.fora>0`) **ou** remoção não restaura a entrada | `resumo.json` (`cliques_por_fase`) | NOT TESTED |
+| T42 | B22 | `mask-minima` (região **não vazia** 1×1 px) | ≥ 20 cliques em qualquer ponto passam: `cliques_fora==0` e `cliques_dentro==0`; operador `s` | qualquer clique recebido pela sonda | `resumo.json` | NOT TESTED |
+| T43 | B22 | Evidência de protocolo (`WAYLAND_DEBUG` + `extrair_input_region.sh`) para T19–T22, T41, T42 | log presente e as requisições `set_input_region`/`wl_region.add` compatíveis com a variante (ex.: `mask-central` ⇒ `wl_region` com `.add` do retângulo); registra `nil` × região vazia × região positiva | log ausente ou ilegível (⇒ `NOT TESTED`, não FAIL); incompatibilidade entre o enviado e o observado ⇒ FAIL | `wayland-debug-*.log`, saída do extrator | NOT TESTED |
+
+## Códigos de saída das sondas
+`0` concluído · `1` erro · `2` argumentos inválidos · `3` vigia forçou saída (travamento) · `4` interrompido. O `0` **não é**
+PASS: PASS/FAIL só vem dos critérios acima e de evidência arquivada. `resumo.json` registra `status` e `codigo_saida`.
 
 T05 está reservado e sem uso (numeração mantida para referência cruzada futura).
