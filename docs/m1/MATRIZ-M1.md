@@ -5,6 +5,8 @@
 > **informativo** (a máscara Qt vazia tem resultado indeterminado a priori); "entrada efetivamente vazia" é avaliada por
 > T21, T42 e T43.
 
+> **Prioridade (D9/ADR 003):** o subconjunto `xcb`/XWayland desta matriz está consolidado em [`M1X-RELATORIO.md`](M1X-RELATORIO.md). Os testes `wayland` nativo ficam como trilha futura.
+
 Legenda: **PASS** (observado, com evidência) · **FAIL** (observado e falhou) · **NOT TESTED** (não executado ou
 execução inválida). **Todos os testes estão `NOT TESTED`** — nenhuma sessão KDE Wayland real foi usada.
 Execução fora de KDE Wayland real (ver T01) não gera PASS/FAIL. "B##" refere-se à matriz do M0

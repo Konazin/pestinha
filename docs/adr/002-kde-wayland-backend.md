@@ -3,6 +3,7 @@
 - **Status:** Proposed (nenhuma alternativa selecionada)
 - **Data:** 2026-11-03
 - **Escopo:** apenas a proposta; nada foi executado em KDE real
+- **Nota (2026-11-03):** o proprietário adotou XWayland como backend provisório do MVP ([ADR 003](003-xwayland-backend-provisorio.md)). Este ADR (Wayland nativo) segue `Proposed` e **não implementado**: é a evolução futura.
 
 ## Contexto (fatos do repositório)
 
