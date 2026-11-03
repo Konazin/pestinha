@@ -14,7 +14,7 @@ Severidade: P0 = bloqueia o alvo KDE/Wayland; P1 = degrada; P2 = menor. Todas as
 | R7 | P1 | Leitura de janelas/ocioso indisponível | Menos sentidos; SNN recebe entradas padrão | `linux.py` só X11 | B17 | Capability Layer com "não suportado" explícito |
 | R8 | P1 | Atalho global em Wayland | Pânico inacessível | `pynput` não funciona; portal pode exigir confirmação | B16 | Pânico também via bandeja (já existe) + portal |
 | R9 | P1 | Privacidade do script KWin | Script com acesso amplo | Qualquer script pode chamar D-Bus arbitrário | B18 | Payload mínimo (retângulos), auditável |
-| R10 | P1 | Arte × contrato de estados | Retrabalho de assets | Mapeamento `emotion`→sprite imaturo | Revisão em M3 | Arte final só em M5 |
+| R10 | P1 | Arte × contrato de estados | Retrabalho de assets | Mapeamento `emotion`→sprite imaturo | Revisão em M3 | Arte final só em M4, após D5 |
 | R11 | P1 | Regressão da SNN | Perda de personalidade/memória | Mudança em `core/` ou `memory/` | Testes existentes (352) + diff vazio em `core/` | Fronteira `PetState`/`Body`; sem migração |
 | R12 | P2 | CI só offscreen | Falsa confiança | `conftest.py` força offscreen | Execução manual em KDE | Matriz com PASS apenas por evidência real |
 | R13 | P2 | Documentação externa não verificada | Decisões erradas | Sites oficiais inacessíveis nesta sessão | Reconferir no M1 | Marcar tudo como hipótese |

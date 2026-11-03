@@ -38,5 +38,5 @@ como alternativas. **Nada é aceito sem os spikes de M1 e aprovação do proprie
 ## Consequências / pontos em aberto
 
 - O contrato de renderer precisa expor a **região opaca** (para input region — ver ADR 002).
-- Mapeamento `emotion` (`EYE_SHAPES`, `EMOTION_NAMES`) → estado de sprite a definir em M3.
-- Arte final somente em M5, após validação em KDE real.
+- Mapeamento `emotion` (`EYE_SHAPES`, `EMOTION_NAMES`) → estado de sprite a definir em M3 (sprites provisórios).
+- Arte final somente em M4, após validação em KDE real (M1/M2, decisão D5).
