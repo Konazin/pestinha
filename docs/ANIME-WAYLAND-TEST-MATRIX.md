@@ -21,7 +21,7 @@ Pré-requisitos a registrar: `cat /etc/os-release`, `plasmashell --version`, `kw
 | ID | Teste | Passos | Critério PASS | Resultado |
 |---|---|---|---|---|
 | B1 | Ambiente | Registrar pré-requisitos | Todos os campos preenchidos | NOT TESTED |
-| B2 | App atual em `xcb` (XWayland) | `QT_QPA_PLATFORM=xcb python main.py --direto` | Pet aparece, anda (`move()`), fica por cima | NOT TESTED |
+| B2 | App atual em `xcb` (XWayland) | `QT_QPA_PLATFORM=xcb python main.py --direto` | Pet aparece, anda (`move()`), fica por cima | NOT TESTED (indício informal do proprietário em C1; sem evidência arquivada) |
 | B3 | App atual em `wayland` | `QT_QPA_PLATFORM=wayland python main.py --direto` | Registrar se `move()` posiciona a janela | NOT TESTED |
 | B4 | PySide6 wheel × Qt do sistema | Verificar plugin `wayland` carregado, `QT_DEBUG_PLUGINS=1` | Sem abort; plugin correto | NOT TESTED |
 | B5 | Transparência | Pet sobre janela com fundo claro/escuro | Sem retângulo preto/branco | NOT TESTED |
@@ -58,3 +58,14 @@ Usar um retângulo/silhueta de teste descartável fora de `pestinha/`.
 | B27 | Comparação com X11/XWayland | Repetir B21-B22 com `xcb` | Registrar diferença de comportamento | NOT TESTED |
 
 Cada execução deve anexar: data, versões, comando, log/vídeo curto e veredito.
+
+## C. Evidências declaradas pelo proprietário (informais — não são PASS)
+
+Registradas em 2026-11-03 para a decisão D9 (ADR 003). Não têm log nem critério objetivo, portanto **não alteram** o
+resultado de nenhuma linha acima. A validação formal está em `docs/m1/M1X-RELATORIO.md`.
+
+| ID | Declarado | Linhas relacionadas | Situação |
+|---|---|---|---|
+| C1 | App original em `xcb` (XWayland) por 90 s, `rc=0`; movimentação e funcionamento aparentemente normais | B2 (T06/T07/T10) | Indício; **sem evidência arquivada** |
+| C2 | App original em Wayland nativo: objetos concentrados no centro, sem seguir a física esperada | B3 (T09/T11) | Indício; **causa não provada** |
+| C3 | Posicionamento por região, região de entrada, foco e monitores em XWayland | B5–B14, B21–B27 | **Nunca testados** |

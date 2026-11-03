@@ -1,5 +1,10 @@
 # Histórico de versões
 
+## Launcher XWayland (opcional)
+
+- `lancadores/pestinha_xwayland.py` inicia o app com `QT_QPA_PLATFORM=xcb` só para o processo filho, para
+  sessões KDE Plasma 6 em Wayland (ADR 003). `main.py`, Windows, macOS e X11 não mudam.
+
 ## Suporte a macOS e Linux
 
 - Toda a leitura do sistema (programa em primeiro plano, tempo ocioso, janelas, tela cheia, foco e o atalho
